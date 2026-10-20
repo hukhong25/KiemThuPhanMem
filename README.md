@@ -1,20 +1,13 @@
 # Website Bán Sách Công Ty FBC (FBC Bookstore Service)
 
-> **Dự án thực hành môn Kiểm thử phần mềm (Software Testing)**  
-> **Trường Đại học Công nghiệp Hà Nội (HaUI) - Khoa Công nghệ Thông tin**
+> **Dự án thực hành môn Kiểm thử phần mềm (Software Testing)**
 
 ---
 
-## 📌 Thông tin Đề tài & Nhóm thực hiện
+## 📌 Giới thiệu Đề tài
 
-- **Đề tài:** Kiểm thử Website bán sách công ty FBC (FBC Book Store Service)
-- **Học phần:** Kiểm thử phần mềm (IT6013.2 - K18)
-- **Giảng viên hướng dẫn:** ThS. Trần Tiến Dũng
-- **Nhóm sinh viên thực hiện:** Nhóm 5
-  - **Đào Văn Công** (MSSV: 2023601884) - Trưởng nhóm / Quản lý dự án / Tester
-  - **Nguyễn Văn Mạnh** (MSSV: 2023604645) - Quản trị viên & Phân tích hệ thống
-  - **Đàm Minh Hiếu** (MSSV: 2023604325) - Lập kế hoạch & Tester
-  - **Đỗ Đức Thụ** (MSSV: 2023602619) - Hỗ trợ kỹ thuật & Báo cáo
+- **Tên dự án:** Website bán sách công ty FBC (FBC Book Store Service)
+- **Mục tiêu:** Xây dựng hệ thống dịch vụ Backend RESTful API và triển khai kịch bản kiểm thử phần mềm toàn diện (Functional Testing & Security Testing).
 
 ---
 
