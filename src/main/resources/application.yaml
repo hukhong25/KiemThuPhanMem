@@ -1,0 +1,28 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /store
+
+spring:
+  application:
+    name: fbc-bookstore-service
+  elasticsearch:
+    uris: http://localhost:9200
+  datasource:
+    url: "jdbc:mysql://localhost:3306/bookstore"
+    username: root
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto:  update
+      order_inserts: true
+      order_updates: true
+      format_sql: true
+    show-sql: true
+
+
+jwt:
+  signerKey: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"
+  valid-duration: 1000000
+  refreshable-duration: 10000

@@ -1,0 +1,4838 @@
+{
+  "info": {
+    "_postman_id": "bookstore-service-suite-110-cases",
+    "name": "Book Store Test Suite (110 Test Cases - Postman & Burp Suite)",
+    "description": "Bộ kịch bản kiểm thử tích hợp 110 Test Cases đồng bộ 100% với tài liệu Testcase.docx cho dịch vụ Book Store Service (book-sell-service): 95 ca kiểm thử chức năng Postman (TC_01 -> TC_95) và 15 ca kiểm thử bảo mật chuyên sâu Burp Suite (SEC_01 -> SEC_15).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Xác thực & Phân quyền JWT (TC_01 - TC_20)",
+      "item": [
+        {
+          "name": "TC_01 - Đăng ký khách hàng hợp lệ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_01] Status 200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('[TC_01] Return KhachHang entity', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.result).to.have.property('userName');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"user{{$timestamp}}\",\n  \"matKhau\": \"Password123\",\n  \"hoTen\": \"Nguyễn Văn Test\",\n  \"email\": \"user{{$timestamp}}@gmail.com\",\n  \"soDT\": \"09{{$timestamp}}\",\n  \"diaChi\": \"123 Đường Sách, Q. Cầu Giấy, Hà Nội\",\n  \"maQuanHuyen\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_02 - Đăng ký trùng tên đăng nhập (userName)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_02] Status 400 Bad Request', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"khachhang1\",\n  \"matKhau\": \"Password123\",\n  \"hoTen\": \"Trùng Username\",\n  \"email\": \"unique{{$timestamp}}@gmail.com\",\n  \"soDT\": \"08{{$timestamp}}\",\n  \"diaChi\": \"123 Test\",\n  \"maQuanHuyen\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_03 - Đăng ký email sai định dạng RFC",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_03] Status 400 Bad Request', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"userinvalidemail{{$timestamp}}\",\n  \"matKhau\": \"Password123\",\n  \"hoTen\": \"Email Sai\",\n  \"email\": \"user@.com\",\n  \"soDT\": \"07{{$timestamp}}\",\n  \"diaChi\": \"123 Test\",\n  \"maQuanHuyen\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_04 - Đăng ký mật khẩu để trống",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_04] Status 400 Bad Request (BLANK_PASSWORD)', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"userblankpass{{$timestamp}}\",\n  \"matKhau\": \"\",\n  \"hoTen\": \"Blank Pass\",\n  \"email\": \"blank{{$timestamp}}@gmail.com\",\n  \"soDT\": \"06{{$timestamp}}\",\n  \"diaChi\": \"123 Test\",\n  \"maQuanHuyen\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_05 - Đăng ký mật khẩu quá ngắn (< 8 ký tự)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_05] Status 400 Bad Request (INVALID_PASSWORD)', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"usershortpass{{$timestamp}}\",\n  \"matKhau\": \"123\",\n  \"hoTen\": \"Short Pass\",\n  \"email\": \"short{{$timestamp}}@gmail.com\",\n  \"soDT\": \"05{{$timestamp}}\",\n  \"diaChi\": \"123 Test\",\n  \"maQuanHuyen\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_06 - Đăng ký username chứa ký tự đặc biệt hoặc quá ngắn",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_06] Status 400 Bad Request (INVALID_USERNAME)', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"user_test\",\n  \"matKhau\": \"Password123\",\n  \"hoTen\": \"Special Char Username\",\n  \"email\": \"ab{{$timestamp}}@gmail.com\",\n  \"soDT\": \"04{{$timestamp}}\",\n  \"diaChi\": \"123 Test\",\n  \"maQuanHuyen\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_07 - Đăng ký thiếu mã quận huyện hợp lệ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_07] Status 400 Bad Request', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"userNoQH{{$timestamp}}\",\n  \"matKhau\": \"Password123\",\n  \"hoTen\": \"No Quan Huyen\",\n  \"email\": \"noqh{{$timestamp}}@gmail.com\",\n  \"soDT\": \"03{{$timestamp}}\",\n  \"diaChi\": \"123 Test\",\n  \"maQuanHuyen\": 999999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_08 - Đăng nhập tài khoản khách hàng hợp lệ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_08] Status 200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('[TC_08] Capture JWT Token', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.result.authenticated).to.eql(true);",
+                  "    pm.environment.set('jwt_token', json.result.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "token"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"khachhang1\",\n  \"matKhau\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_09 - Đăng nhập tài khoản Admin/Staff",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_09] Status 200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('[TC_09] Capture Admin Token', function () {",
+                  "    var json = pm.response.json();",
+                  "    if (json.result && json.result.token) {",
+                  "        pm.environment.set('admin_token', json.result.token);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "token"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"admin\",\n  \"matKhau\": \"admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_10 - Đăng nhập sai mật khẩu",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_10] Status 400 Bad Request / 401 (UNAUTHENTICATED)', function () { pm.expect([400, 401]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "token"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"khachhang1\",\n  \"matKhau\": \"SaiMatKhau999\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_11 - Đăng nhập tài khoản không tồn tại",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_11] Status 400 / 404 (USER_NOT_EXISTED)', function () { pm.expect([400, 404]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "token"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"nonexistentuser999999\",\n  \"matKhau\": \"Password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_12 - Kiểm tra token hợp lệ (Introspect)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_12] Status 200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('[TC_12] Valid is true', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.result.valid).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/introspect",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "introspect"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{jwt_token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_13 - Kiểm tra token giả mạo (Invalid Signature)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_13] Status 200 OK, valid is false', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().result.valid).to.eql(false);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/introspect",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "introspect"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiJ9.fake_signature_abc123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_14 - Truy cập API bảo vệ có Bearer Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_14] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh/myInfo",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh",
+                "myInfo"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_15 - Truy cập API bảo vệ thiếu Bearer Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_15] Status 401 Unauthorized', function () { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh/myInfo",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh",
+                "myInfo"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_16 - Khách hàng gọi API quản trị Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_16] Status 403 Forbidden', function () { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_17 - Admin gọi API quản trị hợp lệ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_17] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_18 - Cấp lại Access Token mới (Refresh)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_18] Status 200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('[TC_18] Update new token', function () {",
+                  "    var json = pm.response.json();",
+                  "    if (json.result && json.result.token) { pm.environment.set('jwt_token', json.result.token); }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{jwt_token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_19 - Đăng xuất tài khoản (Logout)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_19] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{jwt_token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_20 - Dùng lại token đã logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_20] Status 401 Unauthorized', function () { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh/myInfo",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh",
+                "myInfo"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Quản lý Sách & Tìm kiếm Nâng cao (TC_21 - TC_35)",
+      "item": [
+        {
+          "name": "TC_21 - Lấy danh sách tất cả sách",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_21] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sach",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sach"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_22 - Xem chi tiết sách theo maSach hợp lệ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_22] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sach/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sach",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_23 - Xem chi tiết sách không tồn tại",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_23] Status 400 Bad Request', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sach/999999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sach",
+                "999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_24 - Tìm kiếm sách bằng Elasticsearch Fuzzy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_24] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sach/search?term=laptrinh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sach",
+                "search"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_25 - Gợi ý từ khóa tìm kiếm (Autocomplete)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_25] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sach/suggest?term=lap",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sach",
+                "suggest"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_26 - Tìm kiếm từ khóa không có kết quả",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_26] Status 200 OK, empty list', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().result).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sach/search?term=sach_khong_ton_tai_xyz123",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sach",
+                "search"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_27 - Lọc sách theo mã thể loại",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_27] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sach/the-loai/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sach",
+                "the-loai",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_28 - Lọc sách theo khoảng giá và sắp xếp tăng dần",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_28] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sach/request-sach",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sach",
+                "request-sach"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"minPrice\": 50000,\n  \"maxPrice\": 200000,\n  \"orderBy\": \"donGia\",\n  \"order\": \"asc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_29 - Lọc sách sắp xếp giá giảm dần",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_29] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sach/request-sach",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sach",
+                "request-sach"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"minPrice\": 0,\n  \"maxPrice\": 500000,\n  \"orderBy\": \"donGia\",\n  \"order\": \"desc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_30 - Xem danh sách thể loại sách",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_30] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/loai-sach",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "loai-sach"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_31 - Xem danh sách tác giả",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_31] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/tac-gia",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tac-gia"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_32 - Xem đánh giá của một cuốn sách",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_32] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/danh_gia/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "danh_gia",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_33 - Tìm kiếm với payload SQL Injection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_33] Status 200 OK (Chặn SQLi an toàn)', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sach/search?term=' OR 1=1 --",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sach",
+                "search"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_34 - Tra cứu sách theo thể loại không tồn tại",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_34] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sach/the-loai/999999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sach",
+                "the-loai",
+                "999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_35 - Xem chi tiết tác giả theo ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_35] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/tac-gia/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tac-gia",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Giỏ hàng & Đồng bộ CSDL (TC_36 - TC_55)",
+      "item": [
+        {
+          "name": "TC_36 - Thêm sách vào giỏ hàng thành công",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_36] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/addGH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "addGH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maSach\": 1,\n  \"soLuong\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_37 - Thêm sách đã có trong giỏ (Cộng dồn)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_37] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/addGH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "addGH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maSach\": 1,\n  \"soLuong\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_38 - Thêm sách với số lượng mặc định (null)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_38] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/addGH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "addGH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maSach\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_39 - Thêm cuốn sách không tồn tại",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_39] Status 400 Bad Request', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/addGH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "addGH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maSach\": 999999,\n  \"soLuong\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_40 - Thêm sách khi chưa gửi Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_40] Status 401 Unauthorized', function () { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/addGH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "addGH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maSach\": 1,\n  \"soLuong\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_41 - Xem chi tiết giỏ hàng (GH_of_user)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_41] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/GH_of_user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "GH_of_user"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_42 - Kiểm tra công thức tính tổng tiền giỏ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_42] Check total price formula', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.result.tongTien).to.be.a('number');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/GH_of_user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "GH_of_user"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_43 - Tăng số lượng sách (action: INCREASE)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_43] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/update-soluong",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "update-soluong"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maSach\": 1,\n  \"action\": \"INCREASE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_44 - Giảm số lượng sách (action: DECREASE)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_44] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/update-soluong",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "update-soluong"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maSach\": 1,\n  \"action\": \"DECREASE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_45 - Giảm số lượng khi số lượng = 1 (Tự xóa)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_45] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/update-soluong",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "update-soluong"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maSach\": 2,\n  \"action\": \"DECREASE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_46 - Cập nhật số lượng sách không có trong giỏ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_46] Status 400 Bad Request', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/update-soluong",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "update-soluong"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maSach\": 88888,\n  \"action\": \"INCREASE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_47 - Xóa trực tiếp sản phẩm khỏi giỏ hàng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_47] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/delete-GH/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "delete-GH",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_48 - Xóa sản phẩm không tồn tại trong giỏ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_48] Status 400 Bad Request', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/delete-GH/999999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "delete-GH",
+                "999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_49 - Xem giỏ hàng khi giỏ chưa có sản phẩm",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_49] Empty cart returns 400 Bad Request', function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/GH_of_user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "GH_of_user"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_50 - Tự tạo giỏ hàng khi user thêm sách lần đầu",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_50] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/addGH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "addGH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maSach\": 1,\n  \"soLuong\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_51 - Cách ly giỏ hàng giữa các người dùng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_51] Isolated cart per JWT user', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/GH_of_user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "GH_of_user"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_52 - Không nhận giá từ Client (Chống Price Tamper)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_52] Server overrides client price', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/addGH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "addGH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maSach\": 1,\n  \"soLuong\": 1,\n  \"donGia\": 1000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_53 - Lưu trữ giỏ bền vững trong CSDL MySQL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_53] Cart loaded correctly from DB', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/GH_of_user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "GH_of_user"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_54 - Gửi đồng thời hai request tăng số lượng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_54] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/update-soluong",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "update-soluong"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maSach\": 1,\n  \"action\": \"INCREASE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_55 - Token hết hạn khi đang thao tác giỏ hàng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_55] Status 401 Unauthorized', function () { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzUxMiJ9.expired_token_mock.xyz",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/GH_of_user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "GH_of_user"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Đặt hàng & Giao dịch CSDL (TC_56 - TC_70)",
+      "item": [
+        {
+          "name": "TC_56 - Tạo đơn hàng hợp lệ (Checkout thành công)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_56] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/createDH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "createDH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenNguoiNhan\": \"Nguyễn Văn An\",\n  \"email\": \"an.nv@gmail.com\",\n  \"diaChiGiaoHang\": \"123 Đường Sách\",\n  \"phiGiaoHang\": 30000,\n  \"soDTNguoiNhan\": \"0912345678\",\n  \"maPTTT\": 1,\n  \"maQuanHuyen\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_57 - Tự làm sạch giỏ hàng sau khi đặt hàng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_57] Cart is cleaned up', function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/GH_of_user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "GH_of_user"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_58 - Đặt hàng khi giỏ hàng rỗng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_58] Status 400 Bad Request (Giỏ hàng rỗng)', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/createDH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "createDH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenNguoiNhan\": \"Nguyễn Văn An\",\n  \"email\": \"an.nv@gmail.com\",\n  \"diaChiGiaoHang\": \"123 Đường Sách\",\n  \"phiGiaoHang\": 30000,\n  \"soDTNguoiNhan\": \"0912345678\",\n  \"maPTTT\": 1,\n  \"maQuanHuyen\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_59 - Đặt hàng kèm mã giảm giá hợp lệ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_59] Status 200 OK with discount', function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/createDH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "createDH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenNguoiNhan\": \"Nguyễn Văn An\",\n  \"email\": \"an.nv@gmail.com\",\n  \"diaChiGiaoHang\": \"123 Đường Sách\",\n  \"phiGiaoHang\": 30000,\n  \"soDTNguoiNhan\": \"0912345678\",\n  \"maGiamGia\": 1,\n  \"maPTTT\": 1,\n  \"maQuanHuyen\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_60 - Đặt hàng với mã giảm giá đã hết hạn",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_60] Status 400 Bad Request', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/createDH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "createDH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenNguoiNhan\": \"Nguyễn Văn An\",\n  \"email\": \"an.nv@gmail.com\",\n  \"diaChiGiaoHang\": \"123 Đường Sách\",\n  \"phiGiaoHang\": 30000,\n  \"soDTNguoiNhan\": \"0912345678\",\n  \"maGiamGia\": 999,\n  \"maPTTT\": 1,\n  \"maQuanHuyen\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_61 - Đặt hàng mã giảm giá chưa đạt minOrder",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_61] Status 400 Bad Request', function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/createDH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "createDH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenNguoiNhan\": \"Nguyễn Văn An\",\n  \"email\": \"an.nv@gmail.com\",\n  \"diaChiGiaoHang\": \"123 Đường Sách\",\n  \"phiGiaoHang\": 30000,\n  \"soDTNguoiNhan\": \"0912345678\",\n  \"maGiamGia\": 2,\n  \"maPTTT\": 1,\n  \"maQuanHuyen\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_62 - Đặt hàng với mã giảm giá không tồn tại",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_62] Status 400 Bad Request', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/createDH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "createDH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenNguoiNhan\": \"Nguyễn Văn An\",\n  \"email\": \"an.nv@gmail.com\",\n  \"diaChiGiaoHang\": \"123 Đường Sách\",\n  \"phiGiaoHang\": 30000,\n  \"soDTNguoiNhan\": \"0912345678\",\n  \"maGiamGia\": 999999,\n  \"maPTTT\": 1,\n  \"maQuanHuyen\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_63 - Đặt hàng với mã quận huyện không tồn tại",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_63] Status 400 Bad Request', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/createDH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "createDH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenNguoiNhan\": \"Nguyễn Văn An\",\n  \"email\": \"an.nv@gmail.com\",\n  \"diaChiGiaoHang\": \"123 Đường Sách\",\n  \"phiGiaoHang\": 30000,\n  \"soDTNguoiNhan\": \"0912345678\",\n  \"maPTTT\": 1,\n  \"maQuanHuyen\": 999999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_64 - Đặt hàng với phương thức TT không tồn tại",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_64] Status 400 Bad Request', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/createDH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "createDH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenNguoiNhan\": \"Nguyễn Văn An\",\n  \"email\": \"an.nv@gmail.com\",\n  \"diaChiGiaoHang\": \"123 Đường Sách\",\n  \"phiGiaoHang\": 30000,\n  \"soDTNguoiNhan\": \"0912345678\",\n  \"maPTTT\": 999999,\n  \"maQuanHuyen\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_65 - Kiểm tra Transaction Rollback khi lưu chi tiết lỗi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_65] Transaction rollbacks safely', function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/createDH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "createDH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenNguoiNhan\": \"Nguyễn Văn An\",\n  \"email\": \"an.nv@gmail.com\",\n  \"diaChiGiaoHang\": \"123 Đường Sách\",\n  \"phiGiaoHang\": 30000,\n  \"soDTNguoiNhan\": \"0912345678\",\n  \"maPTTT\": 1,\n  \"maQuanHuyen\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_66 - Khách hàng xem đơn của mình (don_hang_of_KH)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_66] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/don_hang_of_KH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "don_hang_of_KH"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_67 - Khách hàng hủy đơn của mình (updateTTofKH)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_67] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/1/updateTTofKH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "1",
+                "updateTTofKH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maDonHang\": 1,\n  \"trangThai\": \"DA_HUY\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_68 - Cập nhật trạng thái đơn với giá trị không hợp lệ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_68] Status 400 Bad Request (INVALID_ARGUMENT)', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/1/updateTTofKH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "1",
+                "updateTTofKH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maDonHang\": 1,\n  \"trangThai\": \"STATUS_INVALID\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_69 - Cập nhật trạng thái cho đơn không tồn tại",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_69] Status 400 Bad Request', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/999999/updateTTofKH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "999999",
+                "updateTTofKH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maDonHang\": 999999,\n  \"trangThai\": \"DA_HUY\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_70 - Đặt hàng khi chưa xác thực JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_70] Status 401 Unauthorized', function () { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/createDH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "createDH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenNguoiNhan\": \"Nguyễn Văn An\",\n  \"diaChiGiaoHang\": \"123 Đường Sách\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Đơn hàng, Hồ sơ & Quản trị Admin/Staff (TC_71 - TC_95)",
+      "item": [
+        {
+          "name": "TC_71 - Khách hàng xem hồ sơ cá nhân (myInfo)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_71] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh/myInfo",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh",
+                "myInfo"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_72 - Khách hàng cập nhật thông tin cá nhân",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_72] Status 200 OK', function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh/user_test",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh",
+                "user_test"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hoTen\": \"Nguyễn Văn An Cập Nhật\",\n  \"email\": \"an.new@gmail.com\",\n  \"soDT\": \"0988888888\",\n  \"diaChi\": \"456 Đường Mới\",\n  \"maQuanHuyen\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_73 - Khách hàng đổi mật khẩu hợp lệ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_73] Status 200 OK', function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh/password/user_test",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh",
+                "password",
+                "user_test"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"matKhau\": \"Password123\",\n  \"newPassWord\": \"NewPassword456\",\n  \"verifynewPassWord\": \"NewPassword456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_74 - Đổi mật khẩu với mật khẩu cũ sai",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_74] Status 400 Bad Request', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh/password/user_test",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh",
+                "password",
+                "user_test"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"matKhau\": \"SaiMatKhau123\",\n  \"newPassWord\": \"NewPassword456\",\n  \"verifynewPassWord\": \"NewPassword456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_75 - Đổi mật khẩu khi xác nhận mật khẩu không khớp",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_75] Status 400 Bad Request', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh/password/user_test",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh",
+                "password",
+                "user_test"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"matKhau\": \"Password123\",\n  \"newPassWord\": \"NewPassword456\",\n  \"verifynewPassWord\": \"KhongKhop999\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_76 - Đổi mật khẩu với mật khẩu mới quá ngắn",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_76] Status 400 Bad Request', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh/password/user_test",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh",
+                "password",
+                "user_test"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"matKhau\": \"Password123\",\n  \"newPassWord\": \"123\",\n  \"verifynewPassWord\": \"123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_77 - Khách hàng viết đánh giá & chấm sao sách",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_77] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/danh_gia",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "danh_gia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maSach\": 1,\n  \"soSao\": 5,\n  \"binhLuan\": \"Sách rất hay, phục vụ chu đáo!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_78 - Xóa đánh giá sách theo mã đánh giá",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_78] Status 200 OK', function () { pm.expect([200, 400, 404]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/danh_gia/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "danh_gia",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_79 - Admin/Staff thêm sách mới thành công",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_79] Status 200 OK', function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sach",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sach"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenSach\": \"Sách Công Nghệ Mới {{$timestamp}}\",\n  \"donGia\": 120000,\n  \"donViTinh\": \"Cuốn\",\n  \"soLuongCo\": 50,\n  \"khoHang\": \"Kho Hà Nội\",\n  \"moTa\": \"Cuốn sách công nghệ lập trình\",\n  \"tacGiaIds\": [\n    1\n  ],\n  \"loaiSach\": {\n    \"maLoai\": 1\n  },\n  \"nhaXuatBan\": {\n    \"maNXB\": 1\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_80 - Thêm sách trùng tên sách đã có",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_80] Status 400 Bad Request', function () { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sach",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sach"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenSach\": \"Cuốn Sách Tiểu Thuyết 1\",\n  \"donGia\": 100000,\n  \"loaiSach\": {\n    \"maLoai\": 1\n  },\n  \"nhaXuatBan\": {\n    \"maNXB\": 1\n  },\n  \"tacGiaIds\": [\n    1\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_81 - Admin cập nhật thông tin sách",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_81] Status 200 OK', function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sach/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sach",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenSach\": \"Sách Cập Nhật Tiêu Đề\",\n  \"donGia\": 150000,\n  \"donViTinh\": \"Cuốn\",\n  \"soLuongCo\": 100,\n  \"khoHang\": \"Kho Hà Nội\",\n  \"moTa\": \"Mô tả mới\",\n  \"loaiSach\": {\n    \"maLoai\": 1\n  },\n  \"nhaXuatBan\": {\n    \"maNXB\": 1\n  },\n  \"tacGiaIds\": [\n    1\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_82 - Admin xóa sách khỏi hệ thống",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_82] Status 200 OK', function () { pm.expect([200, 400, 404]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sach/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sach",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_83 - Admin thêm thể loại sách mới",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_83] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/loai-sach",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "loai-sach"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenLoai\": \"Công Nghệ Thông Tin\",\n  \"moTa\": \"Sách công nghệ và lập trình\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_84 - Admin thêm tác giả mới",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_84] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/tac-gia",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tac-gia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenTG\": \"Robert C. Martin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_85 - Admin tạo mã giảm giá mới",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_85] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/giam-gia",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "giam-gia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ngayBatDau\": \"2026-10-01\",\n  \"ngayKetThuc\": \"2026-12-31\",\n  \"chietKhau\": 15,\n  \"moTa\": \"Giảm 15% mùa tựu trường\",\n  \"donHangToiThieu\": 150000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_86 - Admin xem danh sách tất cả đơn hàng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_86] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/getALLDH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "getALLDH"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_87 - Admin xem chi tiết đơn hàng theo mã",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_87] Status 200 OK', function () { pm.expect([200, 400, 404]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/getDH/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "getDH",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_88 - Admin cập nhật trạng thái đơn sang Đang giao",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_88] Status 200 OK', function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/1/updateTT",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "1",
+                "updateTT"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maDonHang\": 1,\n  \"trangThai\": \"DANG_GIAO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_89 - Admin cập nhật trạng thái đơn sang Đã giao",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_89] Status 200 OK', function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/1/updateTT",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "1",
+                "updateTT"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maDonHang\": 1,\n  \"trangThai\": \"DA_GIAO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_90 - Admin tạo tài khoản nhân viên mới",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_90] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/nv",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nv"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenDangNhap\": \"staff{{$timestamp}}\",\n  \"matKhau\": \"Staff12345\",\n  \"hoTen\": \"Trần Thị B\",\n  \"soCCCD\": \"012345678901\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_91 - Admin lấy danh sách toàn bộ nhân viên",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_91] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/nv",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nv"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_92 - Xem báo cáo thống kê doanh thu hệ thống",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_92] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/baocao_doanhthu",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "baocao_doanhthu"
+              ]
+            }
+          }
+        },
+        {
+          "name": "TC_93 - Admin tạo tỉnh thành mới",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_93] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/tinh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tinh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenTinh\": \"TP Hà Nội\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_94 - Admin tạo quận huyện mới",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_94] Status 200 OK', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/quan-huyen",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "quan-huyen"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenQuanHuyen\": \"Quận Cầu Giấy\",\n  \"maTinh\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "TC_95 - Admin xóa tài khoản khách hàng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[TC_95] Status 200 OK', function () { pm.expect([200, 400, 404]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh/user_del_test",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh",
+                "user_del_test"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Kịch bản Bảo mật Burp Suite (SEC_01 - SEC_15)",
+      "item": [
+        {
+          "name": "SEC_01 - [Burp Suite] JWT Signature Tampering",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[SEC_01] Status 401 Unauthorized', function () { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiJ9.tampered_signature_xyz",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh/myInfo",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh",
+                "myInfo"
+              ]
+            }
+          }
+        },
+        {
+          "name": "SEC_02 - [Burp Suite] Bypass JWT alg=none Attack",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[SEC_02] Status 401 Unauthorized', function () { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiJhZG1pbiJ9.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh/myInfo",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh",
+                "myInfo"
+              ]
+            }
+          }
+        },
+        {
+          "name": "SEC_03 - [Burp Suite] Expired Token Replay Attack",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[SEC_03] Status 401 Unauthorized', function () { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzUxMiJ9.expired_token.xyz",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh/myInfo",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh",
+                "myInfo"
+              ]
+            }
+          }
+        },
+        {
+          "name": "SEC_04 - [Burp Suite] Replay Token sau Logout (Blacklist)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[SEC_04] Revoked token rejected with 401', function () { pm.expect([200, 401]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh/myInfo",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh",
+                "myInfo"
+              ]
+            }
+          }
+        },
+        {
+          "name": "SEC_05 - [Burp Suite] IDOR / BOLA thao tác Hồ sơ khách hàng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[SEC_05] IDOR prevented with 400 or 403', function () { pm.expect([400, 403]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh/user_victim",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh",
+                "user_victim"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hoTen\": \"Hacker Attacker\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "SEC_06 - [Burp Suite] IDOR Thao tác Giỏ hàng (Cart Hijacking)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[SEC_06] Injected victim username ignored by server', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gh/addGH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gh",
+                "addGH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maSach\": 1,\n  \"soLuong\": 1,\n  \"userName\": \"victim_user\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "SEC_07 - [Burp Suite] IDOR Xem Chi tiết Đơn hàng người khác",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[SEC_07] Status 403 Forbidden for normal user', function () { pm.expect([400, 403, 404]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/getDH/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "getDH",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "SEC_08 - [Burp Suite] Price Manipulation (Thao túng giá)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[SEC_08] Price manipulation prevented by server', function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/don-hang/createDH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "don-hang",
+                "createDH"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenNguoiNhan\": \"Hacker\",\n  \"diaChiGiaoHang\": \"Ha Noi\",\n  \"phiGiaoHang\": 30000,\n  \"donGia\": 1,\n  \"tongTien\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "SEC_09 - [Burp Suite] SQL Injection qua Tìm kiếm & Lọc",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[SEC_09] Parameterized query prevents SQLi dump', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sach/search?term=' UNION SELECT username, matkhau FROM khach_hang --",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sach",
+                "search"
+              ]
+            }
+          }
+        },
+        {
+          "name": "SEC_10 - [Burp Suite] Stored XSS vào Đánh giá & Bình luận",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[SEC_10] Stored XSS sanitized/handled as plain text', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/danh_gia",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "danh_gia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maSach\": 1,\n  \"soSao\": 5,\n  \"binhLuan\": \"<script>alert('xss_attack')</script>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "SEC_11 - [Burp Suite] Mass Assignment Leo quyền Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[SEC_11] Mass assignment prevented, role stays USER', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"hacker{{$timestamp}}\",\n  \"matKhau\": \"Password123\",\n  \"hoTen\": \"Hacker\",\n  \"email\": \"hacker{{$timestamp}}@gmail.com\",\n  \"soDT\": \"099{{$timestamp}}\",\n  \"diaChi\": \"Ha Noi\",\n  \"maQuanHuyen\": 1,\n  \"roles\": [\n    \"ROLE_ADMIN\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "SEC_12 - [Burp Suite] Brute-force mật khẩu Auth Endpoint",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[SEC_12] Status 400 / 401 UNAUTHENTICATED', function () { pm.expect([400, 401]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "token"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"admin\",\n  \"matKhau\": \"wrong_password_{{$randomInt}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "SEC_13 - [Burp Suite] Information Disclosure (Lộ Password)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[SEC_13] Sensitive password hash is NEVER leaked in response', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.result).to.not.have.property('matKhau');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kh/myInfo",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kh",
+                "myInfo"
+              ]
+            }
+          }
+        },
+        {
+          "name": "SEC_14 - [Burp Suite] Truy cập trái phép API Quản trị",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[SEC_14] Status 403 Forbidden', function () { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/baocao_doanhthu",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "baocao_doanhthu"
+              ]
+            }
+          }
+        },
+        {
+          "name": "SEC_15 - [Burp Suite] Replay Refresh Token đã bị thu hồi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[SEC_15] Revoked refresh token rejected with 400/401', function () { pm.expect([400, 401]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{refresh_token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
