@@ -26,14 +26,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadInitialData() {
-    await Promise.all([
-        loadCategories(),
-        loadAuthors(),
-        loadVouchers(),
-        loadBooks()
-    ]);
+    try { await loadCategories(); } catch(e) { console.warn('Categories load error:', e); }
+    try { await loadAuthors(); } catch(e) { console.warn('Authors load error:', e); }
+    try { await loadVouchers(); } catch(e) { console.warn('Vouchers load error:', e); }
+    try { await loadBooks(); } catch(e) { console.warn('Books load error:', e); }
     if (token) {
-        await loadCartBadge();
+        try { await loadCartBadge(); } catch(e) { console.warn('Cart badge load error:', e); }
     }
 }
 
@@ -684,7 +682,8 @@ async function loadCartBadge() {
     try {
         const res = await apiRequest('/gh/GH_of_user');
         const cart = res?.result;
-        const totalItems = cart?.chiTietGioHangList?.reduce((acc, item) => acc + item.soLuongMua, 0) || 0;
+        const items = cart?.chiTietGHResponses || cart?.chiTietGioHangList || [];
+        const totalItems = items.reduce((acc, item) => acc + (item.soLuong || item.soLuongMua || 1), 0);
         updateCartBadge(totalItems);
     } catch (e) {
         updateCartBadge(0);
@@ -758,7 +757,7 @@ async function loadCartView() {
 
 function renderCartTable(cart) {
     const tbody = document.getElementById('cartTableBody');
-    const items = cart?.chiTietGioHangList || [];
+    const items = cart?.chiTietGHResponses || cart?.chiTietGioHangList || [];
 
     if (items.length === 0) {
         tbody.innerHTML = `
@@ -776,10 +775,12 @@ function renderCartTable(cart) {
 
     let subtotal = 0;
     tbody.innerHTML = items.map(item => {
-        const book = item.sach;
-        const lineTotal = (item.soLuongMua || 1) * (book.donGia || 0);
+        const book = item.sach || {};
+        const qty = item.soLuong ?? item.soLuongMua ?? 1;
+        const price = item.giaTien || book.donGia || 0;
+        const lineTotal = item.thanhTien || (qty * price);
         subtotal += lineTotal;
-        const priceFmt = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.donGia || 0);
+        const priceFmt = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
         const lineTotalFmt = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(lineTotal);
         const defaultCover = 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=400&q=80';
         const imgUrl = (book.hinhAnhList && book.hinhAnhList.length > 0) ? book.hinhAnhList[0].linkHinhAnh : defaultCover;
@@ -788,9 +789,9 @@ function renderCartTable(cart) {
             <tr>
                 <td>
                     <div class="d-flex align-items-center gap-3">
-                        <img src="${imgUrl}" alt="${book.tenSach}" style="width: 50px; height: 65px; object-fit: cover;" class="rounded" onerror="this.src='${defaultCover}'">
+                        <img src="${imgUrl}" alt="${book.tenSach || ''}" style="width: 50px; height: 65px; object-fit: cover;" class="rounded" onerror="this.src='${defaultCover}'">
                         <div>
-                            <div class="fw-bold text-dark">${book.tenSach}</div>
+                            <div class="fw-bold text-dark">${book.tenSach || 'Sách'}</div>
                             <div class="small text-muted">${book.loaiSach?.tenLoai || ''}</div>
                         </div>
                     </div>
@@ -799,7 +800,7 @@ function renderCartTable(cart) {
                 <td class="text-center">
                     <div class="input-group input-group-sm justify-content-center" style="width: 100px; margin: 0 auto;">
                         <button class="btn btn-outline-secondary" type="button" onclick="updateCartItemQty(${book.maSach}, -1)">-</button>
-                        <input type="text" class="form-control text-center bg-white" value="${item.soLuongMua}" readonly>
+                        <input type="text" class="form-control text-center bg-white" value="${qty}" readonly>
                         <button class="btn btn-outline-secondary" type="button" onclick="updateCartItemQty(${book.maSach}, 1)">+</button>
                     </div>
                 </td>
@@ -817,9 +818,11 @@ function renderCartTable(cart) {
 }
 
 async function updateCartItemQty(maSach, delta) {
-    const item = currentCart?.chiTietGioHangList?.find(i => i.sach.maSach === maSach);
+    const items = currentCart?.chiTietGHResponses || currentCart?.chiTietGioHangList || [];
+    const item = items.find(i => (i.sach?.maSach === maSach) || (i.maSach === maSach));
     if (!item) return;
-    const newQty = item.soLuongMua + delta;
+    const currentQty = item.soLuong ?? item.soLuongMua ?? 1;
+    const newQty = currentQty + delta;
     if (newQty <= 0) {
         removeCartItem(maSach);
         return;
@@ -962,7 +965,8 @@ async function loadDistricts() {
 
 // Checkout Process
 async function processCheckout() {
-    if (!currentCart || !currentCart.chiTietGioHangList || currentCart.chiTietGioHangList.length === 0) {
+    const items = currentCart?.chiTietGHResponses || currentCart?.chiTietGioHangList || [];
+    if (!currentCart || items.length === 0) {
         Swal.fire({ icon: 'warning', text: 'Giỏ hàng của bạn đang rỗng!' });
         return;
     }

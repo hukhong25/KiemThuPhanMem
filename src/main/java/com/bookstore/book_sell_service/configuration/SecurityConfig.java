@@ -38,7 +38,8 @@ public class SecurityConfig {
             "/search", "/suggest"
     };
     private final String[] PUBLIC_GET_ENDPOINTS = {
-            "/", "/index.html", "/*.html", "/css/**", "/js/**", "/images/**", "/static/**", "/favicon.ico",
+            "/", "/index.html", "/*.html", "/*.css", "/*.js", "/style.css", "/app.js",
+            "/css/**", "/js/**", "/images/**", "/static/**", "/favicon.ico",
             "/sach", "/sach/**",
             "/loai-sach", "/loai-sach/**",
             "/tac-gia", "/tac-gia/**",
@@ -59,7 +60,8 @@ public class SecurityConfig {
                         request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers("/", "/index.html", "/*.html", "/css/**", "/js/**", "/images/**", "/static/**", "/favicon.ico").permitAll()
+                                .requestMatchers("/", "/index.html", "/*.html", "/*.css", "/*.js", "/style.css", "/app.js",
+                                        "/css/**", "/js/**", "/images/**", "/static/**", "/favicon.ico").permitAll()
                                 .anyRequest().authenticated()
                 );
 

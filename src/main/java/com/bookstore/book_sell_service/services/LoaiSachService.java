@@ -24,12 +24,10 @@ public class LoaiSachService {
         return theLoaiRepository.save(loaiSach);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public List<LoaiSach> getAllLoaiSach() {
         return theLoaiRepository.findAll();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public LoaiSach getLoaiSachById(Long id) {
         return theLoaiRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Loại sách không tồn tại"));
