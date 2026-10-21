@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Bán Sách Công Ty FBC - FBC Bookstore</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#" onclick="showView('home')">
+                <i class="fa-solid fa-book-bookmark fs-3"></i>
+                <span>FBC BOOKSTORE</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <!-- Search bar -->
+                <div class="d-flex mx-lg-auto my-2 my-lg-0 w-100" style="max-width: 420px;">
+                    <div class="input-group">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Tìm sách theo tên, từ khóa..." onkeyup="handleSearchKeyUp(event)">
+                        <button class="btn btn-warning text-dark fw-bold" onclick="performSearch()">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <ul class="navbar-nav ms-auto align-items-center gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="nav-home" href="#" onclick="showView('home')">
+                            <i class="fa-solid fa-house me-1"></i> Trang chủ
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="nav-vouchers" href="#" onclick="showView('vouchers')">
+                            <i class="fa-solid fa-ticket me-1"></i> Khuyến mãi
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" id="nav-cart" href="#" onclick="showView('cart')">
+                            <i class="fa-solid fa-cart-shopping me-1"></i> Giỏ hàng
+                            <span id="cartBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
+                                0
+                            </span>
+                        </a>
+                    </li>
+                    <li class="nav-item d-none" id="nav-orders-item">
+                        <a class="nav-link" id="nav-orders" href="#" onclick="showView('orders')">
+                            <i class="fa-solid fa-clipboard-list me-1"></i> Đơn hàng
+                        </a>
+                    </li>
+                    <li class="nav-item d-none" id="nav-admin-item">
+                        <a class="nav-link text-warning fw-bold" id="nav-admin" href="#" onclick="showView('admin')">
+                            <i class="fa-solid fa-shield-halved me-1"></i> Quản trị
+                        </a>
+                    </li>
+
+                    <!-- User / Auth Section -->
+                    <li class="nav-item ms-lg-2" id="authSection">
+                        <button class="btn btn-outline-light btn-sm px-3" onclick="openLoginModal()">
+                            <i class="fa-solid fa-right-to-bracket me-1"></i> Đăng nhập
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <main class="container my-4 flex-grow-1">
+
+        <!-- ================= VIEW 1: HOME / BOOK CATALOG ================= -->
+        <section id="view-home">
+            <!-- Hero Banner -->
+            <div class="hero-banner">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-3">
+                            <i class="fa-solid fa-sparkles me-1"></i> Chào mừng đến với FBC Bookstore
+                        </span>
+                        <h1 class="display-5 fw-bold mb-2">Thế Giới Tri Thức & Sách Hay Dành Cho Bạn</h1>
+                        <p class="lead mb-4 text-light opacity-90">
+                            Khám phá hàng nghìn tựa sách văn học, công nghệ, kỹ năng sống với chiết khấu hấp dẫn và giao hàng toàn quốc.
+                        </p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-warning text-dark fw-bold px-4 py-2" onclick="document.getElementById('filterSection').scrollIntoView({behavior: 'smooth'})">
+                                <i class="fa-solid fa-book-open me-1"></i> Khám phá ngay
+                            </button>
+                            <button class="btn btn-outline-light px-4 py-2" onclick="showView('vouchers')">
+                                <i class="fa-solid fa-tags me-1"></i> Săn Voucher giảm giá
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter & Search Toolbar -->
+            <div class="card shadow-sm border-0 mb-4" id="filterSection">
+                <div class="card-body p-3">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-muted mb-1"><i class="fa-solid fa-layer-group me-1"></i> Thể loại:</label>
+                            <select id="filterCategory" class="form-select form-select-sm" onchange="applyFilters()">
+                                <option value="">Tất cả thể loại</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-muted mb-1"><i class="fa-solid fa-user-pen me-1"></i> Tác giả:</label>
+                            <select id="filterAuthor" class="form-select form-select-sm" onchange="applyFilters()">
+                                <option value="">Tất cả tác giả</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-muted mb-1"><i class="fa-solid fa-money-bill-wave me-1"></i> Khoảng giá:</label>
+                            <select id="filterPrice" class="form-select form-select-sm" onchange="applyFilters()">
+                                <option value="all">Mọi mức giá</option>
+                                <option value="under100">Dưới 100.000 đ</option>
+                                <option value="100to200">100.000 đ - 200.000 đ</option>
+                                <option value="over200">Trên 200.000 đ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-secondary btn-sm w-100" onclick="resetFilters()">
+                                <i class="fa-solid fa-rotate-left me-1"></i> Đặt lại bộ lọc
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Book Catalog Section Header -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-book-bookmark text-primary"></i>
+                    <span id="catalogTitle">Danh Sách Sách Mới Nhất</span>
+                </h4>
+                <span id="bookCountBadge" class="badge bg-primary rounded-pill px-3 py-2">Đang tải...</span>
+            </div>
+
+            <!-- Books Grid Container -->
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="booksGrid">
+                <!-- Books injected via JS -->
+            </div>
+        </section>
+
+        <!-- ================= VIEW 2: BOOK DETAIL & REVIEWS ================= -->
+        <section id="view-detail" class="d-none">
+            <button class="btn btn-outline-secondary btn-sm mb-3" onclick="showView('home')">
+                <i class="fa-solid fa-arrow-left me-1"></i> Quay lại danh sách sách
+            </button>
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-4" id="bookDetailContent">
+                    <!-- Book details injected via JS -->
+                </div>
+            </div>
+
+            <!-- Reviews Section -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3 border-0">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="fa-solid fa-comments text-primary me-2"></i> Đánh giá & Nhận xét của độc giả
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- New review form -->
+                    <div id="addReviewFormContainer" class="mb-4 p-3 bg-light rounded-3">
+                        <h6 class="fw-bold text-dark mb-2">Viết đánh giá của bạn:</h6>
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold text-muted me-2">Số sao đánh giá:</label>
+                            <span class="star-rating fs-5 cursor-pointer" id="ratingStars">
+                                <i class="fa-solid fa-star text-warning" data-star="1" onclick="setRating(1)"></i>
+                                <i class="fa-solid fa-star text-warning" data-star="2" onclick="setRating(2)"></i>
+                                <i class="fa-solid fa-star text-warning" data-star="3" onclick="setRating(3)"></i>
+                                <i class="fa-solid fa-star text-warning" data-star="4" onclick="setRating(4)"></i>
+                                <i class="fa-solid fa-star text-warning" data-star="5" onclick="setRating(5)"></i>
+                            </span>
+                        </div>
+                        <div class="mb-2">
+                            <textarea id="reviewComment" class="form-control" rows="2" placeholder="Chia sẻ cảm nhận của bạn về cuốn sách này..."></textarea>
+                        </div>
+                        <button class="btn btn-primary btn-sm px-3" onclick="submitReview()">
+                            <i class="fa-solid fa-paper-plane me-1"></i> Gửi nhận xét
+                        </button>
+                    </div>
+
+                    <!-- Reviews list -->
+                    <div id="reviewsList">
+                        <div class="text-center text-muted py-3">Đang tải đánh giá...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= VIEW 3: CART & CHECKOUT ================= -->
+        <section id="view-cart" class="d-none">
+            <h4 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                <i class="fa-solid fa-cart-shopping text-primary"></i> Giỏ Hàng Của Bạn
+            </h4>
+            <div class="row g-4">
+                <!-- Cart Items List -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-custom table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Sản phẩm</th>
+                                            <th class="text-center">Đơn giá</th>
+                                            <th class="text-center">Số lượng</th>
+                                            <th class="text-end">Thành tiền</th>
+                                            <th class="text-center">Xóa</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cartTableBody">
+                                        <!-- Injected via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline-primary btn-sm mt-3" onclick="showView('home')">
+                        <i class="fa-solid fa-plus me-1"></i> Tiếp tục chọn thêm sách
+                    </button>
+                </div>
+
+                <!-- Checkout Summary & Form -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm p-3">
+                        <h5 class="fw-bold mb-3 text-dark">Thông Tin Thanh Toán</h5>
+                        
+                        <!-- Voucher Code -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Mã giảm giá (Voucher):</label>
+                            <div class="input-group">
+                                <select id="voucherSelect" class="form-select form-select-sm" onchange="applyVoucherSelect()">
+                                    <option value="">Chọn hoặc nhập mã...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Shipping Info -->
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Tỉnh / Thành phố:</label>
+                            <select id="checkoutProvince" class="form-select form-select-sm" onchange="loadDistricts()">
+                                <option value="">Chọn Tỉnh / TP...</option>
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Quận / Huyện:</label>
+                            <select id="checkoutDistrict" class="form-select form-select-sm">
+                                <option value="">Chọn Quận / Huyện...</option>
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Địa chỉ giao hàng chi tiết:</label>
+                            <input type="text" id="checkoutAddress" class="form-control form-control-sm" placeholder="Số nhà, tên đường, phường/xã...">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Phương thức thanh toán:</label>
+                            <select id="checkoutPayment" class="form-select form-select-sm">
+                                <option value="1">Thanh toán khi nhận hàng (COD)</option>
+                                <option value="2">Chuyển khoản trực tuyến (VNPay / Ngân hàng)</option>
+                            </select>
+                        </div>
+
+                        <hr>
+
+                        <!-- Price calculation -->
+                        <div class="d-flex justify-content-between mb-2 small text-muted">
+                            <span>Tạm tính tiền sách:</span>
+                            <span id="cartSubtotal" class="fw-bold text-dark">0 đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 small text-success">
+                            <span>Chiết khấu Voucher:</span>
+                            <span id="cartDiscount" class="fw-bold">-0 đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3 small text-muted">
+                            <span>Phí vận chuyển:</span>
+                            <span id="cartShipping" class="fw-bold text-dark">20.000 đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-4 border-top pt-2">
+                            <span class="fw-bold fs-5 text-dark">Tổng cộng:</span>
+                            <span id="cartTotal" class="fw-bold fs-5 text-danger">20.000 đ</span>
+                        </div>
+
+                        <button id="btnCheckout" class="btn btn-danger w-100 py-2 fw-bold" onclick="processCheckout()">
+                            <i class="fa-solid fa-lock me-1"></i> XÁC NHẬN ĐẶT HÀNG
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= VIEW 4: CUSTOMER ORDERS ================= -->
+        <section id="view-orders" class="d-none">
+            <h4 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                <i class="fa-solid fa-clipboard-list text-primary"></i> Lịch Sử Đơn Hàng Của Bạn
+            </h4>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-custom table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ghi chú</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userOrdersTableBody">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= VIEW 5: VOUCHERS LIST ================= -->
+        <section id="view-vouchers" class="d-none">
+            <h4 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                <i class="fa-solid fa-ticket text-warning"></i> Danh Sách Mã Khuyến Mãi (Vouchers)
+            </h4>
+            <div class="row g-4" id="vouchersGrid">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- ================= VIEW 6: USER PROFILE ================= -->
+        <section id="view-profile" class="d-none">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white py-3 border-0">
+                            <h5 class="fw-bold mb-0 text-dark">
+                                <i class="fa-solid fa-user-circle text-primary me-2"></i> Hồ Sơ Tài Khoản Cá Nhân
+                            </h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <form id="profileForm" onsubmit="handleUpdateProfile(event)">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Tên đăng nhập:</label>
+                                        <input type="text" id="profUsername" class="form-control" disabled>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Vai trò hệ thống:</label>
+                                        <input type="text" id="profRole" class="form-control" disabled>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Họ và tên:</label>
+                                        <input type="text" id="profFullName" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Email:</label>
+                                        <input type="email" id="profEmail" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Số điện thoại:</label>
+                                        <input type="text" id="profPhone" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Địa chỉ:</label>
+                                        <input type="text" id="profAddress" class="form-control" required>
+                                    </div>
+                                    <div class="col-12 mt-3">
+                                        <button type="submit" class="btn btn-primary px-4">
+                                            <i class="fa-solid fa-floppy-disk me-1"></i> Lưu thay đổi thông tin
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Change Password -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3 border-0">
+                            <h5 class="fw-bold mb-0 text-dark">
+                                <i class="fa-solid fa-key text-warning me-2"></i> Đổi Mật Khẩu
+                            </h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Mật khẩu mới:</label>
+                                        <input type="password" id="newPassword" class="form-control" placeholder="Tối thiểu 6 ký tự..." required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Nhập lại mật khẩu mới:</label>
+                                        <input type="password" id="confirmNewPassword" class="form-control" placeholder="Nhập lại chính xác..." required>
+                                    </div>
+                                    <div class="col-12 mt-3">
+                                        <button type="submit" class="btn btn-warning text-dark fw-bold px-4">
+                                            <i class="fa-solid fa-shield-halved me-1"></i> Cập nhật mật khẩu
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= VIEW 7: ADMIN & STAFF DASHBOARD ================= -->
+        <section id="view-admin" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">
+                        <i class="fa-solid fa-gauge-high text-primary me-2"></i> Bảng Điều Khiển Quản Trị Hệ Thống
+                    </h3>
+                    <p class="text-muted small mb-0">Quản lý kho sách, xét duyệt đơn hàng, voucher khuyến mãi và báo cáo thống kê.</p>
+                </div>
+                <div id="adminRoleBadge">
+                    <span class="badge bg-danger px-3 py-2 fs-6">ADMINISTRATOR</span>
+                </div>
+            </div>
+
+            <!-- Admin Nav Tabs -->
+            <ul class="nav nav-pills mb-4 gap-2 admin-nav border-bottom pb-3" id="adminTabs">
+                <li class="nav-item">
+                    <button class="nav-link active" onclick="switchAdminTab('stats')">
+                        <i class="fa-solid fa-chart-line me-1"></i> Báo cáo Doanh thu
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" onclick="switchAdminTab('orders')">
+                        <i class="fa-solid fa-box-open me-1"></i> Quản lý Đơn hàng
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" onclick="switchAdminTab('books')">
+                        <i class="fa-solid fa-book me-1"></i> Quản lý Sách
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" onclick="switchAdminTab('categories')">
+                        <i class="fa-solid fa-tags me-1"></i> Thể loại & Tác giả
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" onclick="switchAdminTab('vouchers')">
+                        <i class="fa-solid fa-ticket me-1"></i> Mã giảm giá
+                    </button>
+                </li>
+                <li class="nav-item admin-only">
+                    <button class="nav-link" onclick="switchAdminTab('users')">
+                        <i class="fa-solid fa-users-gear me-1"></i> Nhân sự & Khách hàng
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab 1: Stats -->
+            <div id="admin-tab-stats">
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-success text-white">
+                                <i class="fa-solid fa-sack-dollar"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small fw-bold">TỔNG DOANH THU</div>
+                                <div class="fs-4 fw-bold text-dark" id="statRevenue">0 đ</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-primary text-white">
+                                <i class="fa-solid fa-boxes-packing"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small fw-bold">TỔNG ĐƠN HÀNG</div>
+                                <div class="fs-4 fw-bold text-dark" id="statTotalOrders">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-warning text-dark">
+                                <i class="fa-solid fa-book-open-reader"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small fw-bold">SỐ SÁCH ĐÃ BÁN</div>
+                                <div class="fs-4 fw-bold text-dark" id="statBooksSold">0 cuốn</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart & Top Books -->
+                <div class="row g-4">
+                    <div class="col-lg-7">
+                        <div class="card border-0 shadow-sm p-4 h-100">
+                            <h5 class="fw-bold mb-3 text-dark">Biểu Đồ Xu Hướng Doanh Thu</h5>
+                            <canvas id="revenueChart" style="max-height: 280px;"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="card border-0 shadow-sm p-4 h-100">
+                            <h5 class="fw-bold mb-3 text-dark">Top Sản Phẩm Bán Chạy</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle">
+                                    <thead>
+                                        <tr class="text-muted small">
+                                            <th>Tên sách</th>
+                                            <th class="text-end">Đã bán</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="topSellingTableBody">
+                                        <!-- Injected via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Orders Management -->
+            <div id="admin-tab-orders" class="d-none">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0 text-dark">Danh Sách Tất Cả Đơn Hàng Toàn Hệ Thống</h5>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadAdminOrders()">
+                            <i class="fa-solid fa-arrows-rotate me-1"></i> Làm mới
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-custom table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Mã ĐH</th>
+                                        <th>Khách hàng</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Trạng thái hiện tại</th>
+                                        <th>Thao tác duyệt trạng thái</th>
+                                        <th class="text-center">Chi tiết</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminOrdersTableBody">
+                                    <!-- Injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Books Management -->
+            <div id="admin-tab-books" class="d-none">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0 text-dark">Quản Lý Kho Sách</h5>
+                        <button class="btn btn-primary btn-sm px-3" onclick="openAddBookModal()">
+                            <i class="fa-solid fa-plus me-1"></i> Thêm sách mới
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-custom table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tên sách</th>
+                                        <th>Thể loại</th>
+                                        <th>Đơn giá</th>
+                                        <th>Tồn kho</th>
+                                        <th>Nhà xuất bản</th>
+                                        <th class="text-center">Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminBooksTableBody">
+                                    <!-- Injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 4: Categories & Authors -->
+            <div id="admin-tab-categories" class="d-none">
+                <div class="row g-4">
+                    <!-- Categories -->
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                                <h5 class="fw-bold mb-0 text-dark">Thể Loại Sách</h5>
+                                <button class="btn btn-outline-primary btn-sm" onclick="openAddCategoryModal()">
+                                    <i class="fa-solid fa-plus me-1"></i> Thêm thể loại
+                                </button>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-custom table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Tên thể loại</th>
+                                                <th>Mô tả</th>
+                                                <th class="text-center">Xóa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="adminCategoriesTableBody">
+                                            <!-- Injected via JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Authors -->
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                                <h5 class="fw-bold mb-0 text-dark">Tác Giả</h5>
+                                <button class="btn btn-outline-primary btn-sm" onclick="openAddAuthorModal()">
+                                    <i class="fa-solid fa-plus me-1"></i> Thêm tác giả
+                                </button>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-custom table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Tên tác giả</th>
+                                                <th>Mô tả</th>
+                                                <th class="text-center">Xóa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="adminAuthorsTableBody">
+                                            <!-- Injected via JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 5: Vouchers -->
+            <div id="admin-tab-vouchers" class="d-none">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0 text-dark">Quản Lý Mã Giảm Giá (Vouchers)</h5>
+                        <button class="btn btn-warning text-dark fw-bold btn-sm px-3" onclick="openAddVoucherModal()">
+                            <i class="fa-solid fa-plus me-1"></i> Tạo Voucher mới
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-custom table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Mã ID</th>
+                                        <th>Chiết khấu (%)</th>
+                                        <th>Đơn tối thiểu</th>
+                                        <th>Ngày bắt đầu</th>
+                                        <th>Ngày kết thúc</th>
+                                        <th class="text-center">Xóa</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminVouchersTableBody">
+                                    <!-- Injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 6: Users & Staff (Admin Only) -->
+            <div id="admin-tab-users" class="d-none">
+                <div class="row g-4">
+                    <!-- Staff -->
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                                <h5 class="fw-bold mb-0 text-dark">Danh Sách Nhân Viên</h5>
+                                <button class="btn btn-primary btn-sm" onclick="openAddStaffModal()">
+                                    <i class="fa-solid fa-user-plus me-1"></i> Thêm nhân viên
+                                </button>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-custom table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Mã NV</th>
+                                                <th>Tên đăng nhập</th>
+                                                <th>Họ tên</th>
+                                                <th class="text-center">Xóa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="adminStaffTableBody">
+                                            <!-- Injected via JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Customers -->
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white py-3 border-0">
+                                <h5 class="fw-bold mb-0 text-dark">Danh Sách Khách Hàng Đã Đăng Ký</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-custom table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Mã KH</th>
+                                                <th>Username</th>
+                                                <th>Họ tên</th>
+                                                <th>Số điện thoại</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="adminCustomersTableBody">
+                                            <!-- Injected via JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container text-center">
+            <h5 class="text-white fw-bold mb-2">HỆ THỐNG WEBSITE BÁN SÁCH CÔNG TY FBC</h5>
+            <p class="small mb-2">Đề tài Bài tập lớn môn Kiểm thử phần mềm (IT6013.2) - Nhóm 5</p>
+            <p class="small text-muted mb-0">Công nghệ: Spring Boot 3.5.6 (Java 21) &bull; MySQL &bull; Elasticsearch &bull; Bootstrap 5 SPA</p>
+        </div>
+    </footer>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- Modal Login -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-right-to-bracket me-2"></i> Đăng Nhập Hệ Thống</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Quick Login Demo Buttons -->
+                    <div class="mb-3 p-2 bg-light rounded text-center">
+                        <div class="small text-muted fw-bold mb-2">Tài khoản mẫu thử nghiệm nhanh:</div>
+                        <div class="btn-group w-100" role="group">
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="fillLoginForm('admin', 'admin')">Admin</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="fillLoginForm('nhanvien1', 'password123')">Nhân viên</button>
+                            <button type="button" class="btn btn-outline-success btn-sm" onclick="fillLoginForm('khachhang1', 'password123')">Khách hàng</button>
+                        </div>
+                    </div>
+
+                    <form id="loginForm" onsubmit="handleLogin(event)">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Tên đăng nhập:</label>
+                            <input type="text" id="loginUsername" class="form-control" required placeholder="Nhập username...">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Mật khẩu:</label>
+                            <input type="password" id="loginPassword" class="form-control" required placeholder="Nhập mật khẩu...">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
+                            <i class="fa-solid fa-arrow-right-to-bracket me-1"></i> Đăng nhập
+                        </button>
+                    </form>
+                    <div class="text-center mt-3 small">
+                        Chưa có tài khoản? <a href="#" class="text-primary fw-bold" onclick="switchToRegisterModal()">Đăng ký tài khoản mới</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Register -->
+    <div class="modal fade" id="registerModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-plus me-2"></i> Đăng Ký Khách Hàng Mới</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="registerForm" onsubmit="handleRegister(event)">
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Tên đăng nhập (Username):</label>
+                            <input type="text" id="regUsername" class="form-control form-control-sm" required placeholder="Ít nhất 4 ký tự...">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Mật khẩu:</label>
+                            <input type="password" id="regPassword" class="form-control form-control-sm" required placeholder="Ít nhất 6 ký tự...">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Họ và tên:</label>
+                            <input type="text" id="regFullName" class="form-control form-control-sm" required placeholder="Nguyễn Văn A">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Email:</label>
+                            <input type="email" id="regEmail" class="form-control form-control-sm" required placeholder="email@example.com">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Số điện thoại:</label>
+                            <input type="text" id="regPhone" class="form-control form-control-sm" required placeholder="0987654321">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Địa chỉ:</label>
+                            <input type="text" id="regAddress" class="form-control form-control-sm" required placeholder="Địa chỉ giao nhận">
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 py-2 fw-bold">
+                            <i class="fa-solid fa-check me-1"></i> Hoàn tất đăng ký
+                        </button>
+                    </form>
+                    <div class="text-center mt-3 small">
+                        Đã có tài khoản? <a href="#" class="text-primary fw-bold" onclick="switchToLoginModal()">Đăng nhập ngay</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Add/Edit Book -->
+    <div class="modal fade" id="bookModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="bookModalTitle">Thêm Sách Mới</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="bookForm" onsubmit="handleSaveBook(event)">
+                        <input type="hidden" id="bookFormId">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label small fw-bold">Tên sách:</label>
+                                <input type="text" id="bookFormName" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Đơn giá (VNĐ):</label>
+                                <input type="number" id="bookFormPrice" class="form-control" min="0" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Số lượng có (Kho):</label>
+                                <input type="number" id="bookFormStock" class="form-control" min="0" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Đơn vị tính:</label>
+                                <input type="text" id="bookFormUnit" class="form-control" value="cuốn" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Thể loại:</label>
+                                <select id="bookFormCategory" class="form-select" required></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Nhà xuất bản:</label>
+                                <input type="text" id="bookFormPublisher" class="form-control" placeholder="NXB Văn Học">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Tác giả:</label>
+                                <select id="bookFormAuthor" class="form-select"></select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Mô tả tóm tắt sách:</label>
+                                <textarea id="bookFormDesc" class="form-control" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary px-4 fw-bold">
+                                <i class="fa-solid fa-floppy-disk me-1"></i> Lưu thông tin sách
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Order Detail -->
+    <div class="modal fade" id="orderDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-file-invoice me-2"></i> Chi Tiết Đơn Hàng</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" id="orderDetailModalBody">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 & Plugins JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Application JS -->
+    <script src="app.js"></script>
+</body>
+</html>

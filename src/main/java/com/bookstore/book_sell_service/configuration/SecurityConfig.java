@@ -34,11 +34,18 @@ public class SecurityConfig {
             "/kh",
             "/auth/token", "/auth/introspect",
             "/quan-huyen", "/kh/{maKH}",
-            "/tinh", "/kh/request-sach",
+            "/tinh", "/kh/request-sach", "/sach/request-sach",
             "/search", "/suggest"
     };
     private final String[] PUBLIC_GET_ENDPOINTS = {
-            "/danh_gia" , "/danh_gia/{maSach}"
+            "/", "/index.html", "/*.html", "/css/**", "/js/**", "/images/**", "/static/**", "/favicon.ico",
+            "/sach", "/sach/**",
+            "/loai-sach", "/loai-sach/**",
+            "/tac-gia", "/tac-gia/**",
+            "/giam-gia", "/giam-gia/**",
+            "/tinh", "/tinh/**",
+            "/quan-huyen", "/quan-huyen/**",
+            "/danh_gia", "/danh_gia/**"
     };
     @Value("${jwt.signerKey}")
     private String signerKey;
@@ -47,9 +54,12 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 
         httpSecurity
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(request ->
                         request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                .requestMatchers("/", "/index.html", "/*.html", "/css/**", "/js/**", "/images/**", "/static/**", "/favicon.ico").permitAll()
                                 .anyRequest().authenticated()
                 );
 
