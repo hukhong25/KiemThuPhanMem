@@ -190,15 +190,21 @@ public class DonHangService {
     //@PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public void updateTrangThai(UpdateTrangThai updateTrangThai)
     {
-
-        NhanVien nhanVien = authenticationService.nhanVien();
+        NhanVien nhanVien = null;
+        try {
+            nhanVien = authenticationService.nhanVien();
+        } catch (Exception ignored) {
+            // Khi ADMIN cập nhật đơn hàng, tài khoản có thể nằm ở bảng KhachHang
+        }
 
         DonHang donHang =  donHangRepository.findById(updateTrangThai.getMaDonHang())
                 .orElseThrow(() -> new RuntimeException("Ko tim thay don hang"));
 
         TrangThai tt = TrangThai.valueOf(updateTrangThai.getTrangThai());
         donHang.setTrangThai(tt.getMoTa());
-        donHang.setNhanVien(nhanVien);
+        if (nhanVien != null) {
+            donHang.setNhanVien(nhanVien);
+        }
 
         donHangRepository.save(donHang);
     }

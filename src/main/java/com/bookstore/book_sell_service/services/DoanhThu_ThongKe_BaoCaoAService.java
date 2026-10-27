@@ -31,12 +31,19 @@ public class DoanhThu_ThongKe_BaoCaoAService {
     public ThongKeResponse thongKeResponse (){
 
         Pageable top1 = PageRequest.of(0,1);
+        List<String> topList = chiTietDHRepository.sachBanChay(top1);
+        String sachMax = (topList != null && !topList.isEmpty()) ? topList.get(0) : "Chưa có";
+        Double doanhThu = chiTietDHRepository.tongDoanhThu();
+        Long donHangCount = donHangRepository.tongDonHang();
+        Long khachHangCount = donHangRepository.tongKhachHang();
+        Integer sachBanCount = chiTietDHRepository.tongSoSachBan();
+
         return ThongKeResponse.builder()
-                .tongDoanhThu(chiTietDHRepository.tongDoanhThu())
-                .tongOonHang(donHangRepository.tongDonHang())
-                .tongKhachHang(donHangRepository.tongKhachHang())
-                .sachBanMax(chiTietDHRepository.sachBanChay(top1).get(0))
-                .tongSachBan(chiTietDHRepository.tongSoSachBan())
+                .tongDoanhThu(doanhThu != null ? doanhThu : 0.0)
+                .tongOonHang(donHangCount != null ? donHangCount : 0L)
+                .tongKhachHang(khachHangCount != null ? khachHangCount : 0L)
+                .sachBanMax(sachMax)
+                .tongSachBan(sachBanCount != null ? sachBanCount : 0)
                 .danhSach(chiTietDHRepository.thongkeList())
                 .thongKeTKT(sachRepository.thongKeTKT())
                 .build();

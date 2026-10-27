@@ -99,7 +99,11 @@ async function checkAuth() {
         try {
             const res = await apiRequest('/kh/myInfo');
             if (res?.result) {
-                currentUser = { ...res.result, role: 'USER' };
+                const roles = res.result.roles ? Array.from(res.result.roles) : [];
+                const isAdmin = roles.includes('ADMIN') || roles.includes('ROLE_ADMIN') || res.result.userName === 'admin';
+                const isStaff = roles.includes('STAFF') || roles.includes('ROLE_STAFF');
+                const role = isAdmin ? 'ADMIN' : (isStaff ? 'STAFF' : 'USER');
+                currentUser = { ...res.result, role: role, roles: roles };
                 renderAuthUI(currentUser);
                 return;
             }
@@ -107,12 +111,13 @@ async function checkAuth() {
             // Not a regular customer, try staff info
             const staffRes = await apiRequest('/nv/myInfo');
             if (staffRes?.result) {
-                const roles = staffRes.result.roles || [];
-                const isAdmin = roles.includes('ADMIN') || staffRes.result.tenDangNhap === 'admin';
+                const roles = staffRes.result.roles ? Array.from(staffRes.result.roles) : [];
+                const isAdmin = roles.includes('ADMIN') || roles.includes('ROLE_ADMIN') || staffRes.result.tenDangNhap === 'admin';
                 currentUser = { 
                     ...staffRes.result, 
                     userName: staffRes.result.tenDangNhap,
-                    role: isAdmin ? 'ADMIN' : 'STAFF' 
+                    role: isAdmin ? 'ADMIN' : 'STAFF',
+                    roles: roles
                 };
                 renderAuthUI(currentUser);
                 return;
@@ -351,7 +356,7 @@ function renderBooksGrid(books) {
         
         const categoryName = book.loaiSach?.tenLoai || 'Chung';
         const defaultCover = 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=400&q=80';
-        const imgUrl = (book.hinhAnhList && book.hinhAnhList.length > 0) ? book.hinhAnhList[0].linkHinhAnh : defaultCover;
+        const imgUrl = (book.hinhAnhs && book.hinhAnhs.length > 0) ? book.hinhAnhs[0] : ((book.hinhAnhList && book.hinhAnhList.length > 0) ? book.hinhAnhList[0].linkHinhAnh : defaultCover);
 
         return `
             <div class="col">
@@ -422,41 +427,83 @@ async function loadAuthors() {
 }
 
 function applyFilters() {
-    const catId = document.getElementById('filterCategory').value;
-    const authorId = document.getElementById('filterAuthor').value;
-    const priceRange = document.getElementById('filterPrice').value;
+    showView('home');
+
+    const catId = document.getElementById('filterCategory')?.value || '';
+    const authorId = document.getElementById('filterAuthor')?.value || '';
+    const priceRange = document.getElementById('filterPrice')?.value || 'all';
+    const sortBy = document.getElementById('filterSort')?.value || 'default';
+    const searchTerm = document.getElementById('searchInput')?.value.trim().toLowerCase() || '';
 
     let filtered = [...allBooks];
 
+    // Filter by search keyword
+    if (searchTerm) {
+        filtered = filtered.filter(b =>
+            (b.tenSach && b.tenSach.toLowerCase().includes(searchTerm)) ||
+            (b.moTa && b.moTa.toLowerCase().includes(searchTerm)) ||
+            (b.loaiSach?.tenLoai && b.loaiSach.tenLoai.toLowerCase().includes(searchTerm))
+        );
+    }
+
+    // Filter by Category
     if (catId) {
         filtered = filtered.filter(b => b.loaiSach?.maLoai == catId);
     }
 
+    // Filter by Author
     if (authorId) {
-        filtered = filtered.filter(b => b.tacGiaSet?.some(a => a.maTG == authorId));
+        filtered = filtered.filter(b => {
+            if (!b.tacGiaSet) return false;
+            const authors = Array.isArray(b.tacGiaSet) ? b.tacGiaSet : Array.from(b.tacGiaSet);
+            return authors.some(a => a.maTG == authorId);
+        });
     }
 
+    // Filter by Price range
     if (priceRange === 'under100') {
-        filtered = filtered.filter(b => b.donGia < 100000);
+        filtered = filtered.filter(b => (b.donGia || 0) < 100000);
     } else if (priceRange === '100to200') {
-        filtered = filtered.filter(b => b.donGia >= 100000 && b.donGia <= 200000);
+        filtered = filtered.filter(b => (b.donGia || 0) >= 100000 && (b.donGia || 0) <= 200000);
     } else if (priceRange === 'over200') {
-        filtered = filtered.filter(b => b.donGia > 200000);
+        filtered = filtered.filter(b => (b.donGia || 0) > 200000);
+    }
+
+    // Sorting
+    if (sortBy === 'priceAsc') {
+        filtered.sort((a, b) => (a.donGia || 0) - (b.donGia || 0));
+    } else if (sortBy === 'priceDesc') {
+        filtered.sort((a, b) => (b.donGia || 0) - (a.donGia || 0));
+    } else if (sortBy === 'nameAsc') {
+        filtered.sort((a, b) => (a.tenSach || '').localeCompare(b.tenSach || ''));
+    } else if (sortBy === 'stockDesc') {
+        filtered.sort((a, b) => (b.soLuongCo || 0) - (a.soLuongCo || 0));
     }
 
     renderBooksGrid(filtered);
-    document.getElementById('catalogTitle').textContent = `Kết Quả Lọc Sách (${filtered.length})`;
-    document.getElementById('bookCountBadge').textContent = `${filtered.length} cuốn`;
+
+    const titleEl = document.getElementById('catalogTitle');
+    const badgeEl = document.getElementById('bookCountBadge');
+    if (catId || authorId || priceRange !== 'all' || searchTerm || sortBy !== 'default') {
+        if (titleEl) titleEl.textContent = `Kết Quả Lọc Sách (${filtered.length})`;
+        if (badgeEl) badgeEl.textContent = `${filtered.length} cuốn`;
+    } else {
+        if (titleEl) titleEl.textContent = 'Danh Sách Sách Mới Nhất';
+        if (badgeEl) badgeEl.textContent = `${allBooks.length} cuốn sách`;
+    }
 }
 
 function resetFilters() {
-    document.getElementById('filterCategory').value = '';
-    document.getElementById('filterAuthor').value = '';
-    document.getElementById('filterPrice').value = 'all';
-    document.getElementById('searchInput').value = '';
-    document.getElementById('catalogTitle').textContent = 'Danh Sách Sách Mới Nhất';
+    if (document.getElementById('filterCategory')) document.getElementById('filterCategory').value = '';
+    if (document.getElementById('filterAuthor')) document.getElementById('filterAuthor').value = '';
+    if (document.getElementById('filterPrice')) document.getElementById('filterPrice').value = 'all';
+    if (document.getElementById('filterSort')) document.getElementById('filterSort').value = 'default';
+    if (document.getElementById('searchInput')) document.getElementById('searchInput').value = '';
+    const titleEl = document.getElementById('catalogTitle');
+    const badgeEl = document.getElementById('bookCountBadge');
+    if (titleEl) titleEl.textContent = 'Danh Sách Sách Mới Nhất';
+    if (badgeEl) badgeEl.textContent = `${allBooks.length} cuốn sách`;
     renderBooksGrid(allBooks);
-    document.getElementById('bookCountBadge').textContent = `${allBooks.length} cuốn`;
 }
 
 function handleSearchKeyUp(event) {
@@ -514,7 +561,7 @@ async function openBookDetail(maSach) {
 
         const priceFmt = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.donGia || 0);
         const defaultCover = 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=400&q=80';
-        const imgUrl = (book.hinhAnhList && book.hinhAnhList.length > 0) ? book.hinhAnhList[0].linkHinhAnh : defaultCover;
+        const imgUrl = (book.hinhAnhs && book.hinhAnhs.length > 0) ? book.hinhAnhs[0] : ((book.hinhAnhList && book.hinhAnhList.length > 0) ? book.hinhAnhList[0].linkHinhAnh : defaultCover);
 
         detailContainer.innerHTML = `
             <div class="row g-4 align-items-center">
@@ -1083,7 +1130,7 @@ async function cancelCustomerOrder(maDonHang) {
     try {
         await apiRequest(`/don-hang/${maDonHang}/updateTTofKH`, 'PUT', {
             maDonHang: maDonHang,
-            trangThai: 'HUY'
+            trangThai: 'DA_HUY'
         });
 
         Swal.fire({ icon: 'success', title: 'Đã hủy đơn hàng thành công', timer: 1500, showConfirmButton: false });
@@ -1210,8 +1257,12 @@ function switchAdminTab(tabName) {
     if (activeEl) activeEl.classList.remove('d-none');
 
     const links = document.querySelectorAll('#adminTabs .nav-link');
-    links.forEach(l => l.classList.remove('active'));
-    event?.target?.closest('.nav-link')?.classList.add('active');
+    links.forEach(l => {
+        l.classList.remove('active');
+        if (l.getAttribute('onclick')?.includes(`'${tabName}'`)) {
+            l.classList.add('active');
+        }
+    });
 
     if (tabName === 'stats') loadAdminStats();
     if (tabName === 'orders') loadAdminOrders();
@@ -1232,8 +1283,8 @@ function loadAdminDashboard() {
     const badge = document.getElementById('adminRoleBadge');
     if (badge) {
         badge.innerHTML = (currentUser.role === 'ADMIN')
-            ? '<span class="badge bg-danger px-3 py-2 fs-6">QUẢN TRỊ VIÊN (ADMIN)</span>'
-            : '<span class="badge bg-info text-dark px-3 py-2 fs-6">NHÂN VIÊN (STAFF)</span>';
+            ? '<span class="badge bg-danger px-3 py-2 fs-6"><i class="fa-solid fa-shield-halved me-1"></i> QUẢN TRỊ VIÊN (ADMIN)</span>'
+            : '<span class="badge bg-info text-dark px-3 py-2 fs-6"><i class="fa-solid fa-user-tie me-1"></i> NHÂN VIÊN (STAFF)</span>';
     }
 
     // Hide admin-only tabs for staff
@@ -1243,7 +1294,7 @@ function loadAdminDashboard() {
         else t.classList.remove('d-none');
     });
 
-    loadAdminStats();
+    switchAdminTab('stats');
 }
 
 async function loadAdminStats() {
@@ -1251,9 +1302,9 @@ async function loadAdminStats() {
         const res = await apiRequest('/baocao_doanhthu');
         const stats = res?.result;
 
-        const rev = stats?.doanhThu || 0;
-        const totalOrders = stats?.tongSoDonHang || 0;
-        const totalBooksSold = stats?.tongSoLuongSachDaBan || 0;
+        const rev = stats?.tongDoanhThu || stats?.doanhThu || 0;
+        const totalOrders = stats?.tongOonHang || stats?.tongDonHang || 0;
+        const totalBooksSold = stats?.tongSachBan || stats?.tongSoLuongSachDaBan || 0;
 
         document.getElementById('statRevenue').textContent = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(rev);
         document.getElementById('statTotalOrders').textContent = totalOrders;
@@ -1261,14 +1312,14 @@ async function loadAdminStats() {
 
         // Render Top Selling Table
         const topTable = document.getElementById('topSellingTableBody');
-        const topBooks = stats?.thongKeSachList || [];
+        const topBooks = stats?.danhSach || stats?.thongKeTKT || stats?.thongKeSachList || [];
         if (topBooks.length === 0) {
-            topTable.innerHTML = '<tr><td colspan="2" class="text-center text-muted">Chưa có dữ liệu</td></tr>';
+            topTable.innerHTML = '<tr><td colspan="2" class="text-center text-muted">Chưa có dữ liệu giao dịch</td></tr>';
         } else {
             topTable.innerHTML = topBooks.slice(0, 5).map(b => `
                 <tr>
                     <td class="fw-bold text-dark">${b.tenSach || 'Sách'}</td>
-                    <td class="text-end fw-bold text-primary">${b.soLuong || 0}</td>
+                    <td class="text-end fw-bold text-primary">${b.soLuongMua || b.soLuongCo || b.soLuong || 0}</td>
                 </tr>
             `).join('');
         }
@@ -1338,9 +1389,11 @@ async function loadAdminOrders() {
                             <option value="">Cập nhật trạng thái...</option>
                             <option value="CHO_XAC_NHAN">Chờ xác nhận</option>
                             <option value="DA_XAC_NHAN">Đã xác nhận</option>
+                            <option value="DANG_CHUAN_BI">Đang chuẩn bị</option>
                             <option value="DANG_GIAO">Đang giao hàng</option>
                             <option value="DA_GIAO">Đã giao thành công</option>
-                            <option value="HUY">Hủy đơn hàng</option>
+                            <option value="DA_HUY">Hủy đơn hàng</option>
+                            <option value="TRA_HANG">Trả hàng</option>
                         </select>
                     </td>
                     <td class="text-center">
@@ -1427,7 +1480,18 @@ function openEditBookModal(maSach) {
     document.getElementById('bookFormPrice').value = book.donGia || 0;
     document.getElementById('bookFormStock').value = book.soLuongCo || 0;
     document.getElementById('bookFormDesc').value = book.moTa || '';
-    if (book.loaiSach) document.getElementById('bookFormCategory').value = book.loaiSach.maLoai;
+    if (book.donViTinh && document.getElementById('bookFormUnit')) {
+        document.getElementById('bookFormUnit').value = book.donViTinh;
+    }
+    if (book.loaiSach && document.getElementById('bookFormCategory')) {
+        document.getElementById('bookFormCategory').value = book.loaiSach.maLoai;
+    }
+    if (book.tacGiaSet && document.getElementById('bookFormAuthor')) {
+        const authors = Array.isArray(book.tacGiaSet) ? book.tacGiaSet : Array.from(book.tacGiaSet);
+        if (authors.length > 0 && authors[0].maTG) {
+            document.getElementById('bookFormAuthor').value = authors[0].maTG;
+        }
+    }
 
     new bootstrap.Modal(document.getElementById('bookModal')).show();
 }
@@ -1438,13 +1502,22 @@ async function handleSaveBook(e) {
     const tenSach = document.getElementById('bookFormName').value.trim();
     const donGia = parseFloat(document.getElementById('bookFormPrice').value) || 0;
     const soLuongCo = parseInt(document.getElementById('bookFormStock').value) || 0;
-    const donViTinh = document.getElementById('bookFormUnit').value.trim() || 'cuốn';
-    const maLoai = parseInt(document.getElementById('bookFormCategory').value) || 1;
-    const tenNXB = document.getElementById('bookFormPublisher').value.trim() || 'NXB Văn Học';
-    const moTa = document.getElementById('bookFormDesc').value.trim();
-    const maTG = document.getElementById('bookFormAuthor').value ? [parseInt(document.getElementById('bookFormAuthor').value)] : [];
+    const donViTinh = document.getElementById('bookFormUnit')?.value.trim() || 'cuốn';
+    const maLoai = parseInt(document.getElementById('bookFormCategory')?.value) || 1;
+    const moTa = document.getElementById('bookFormDesc')?.value.trim() || '';
+    const authorVal = document.getElementById('bookFormAuthor')?.value;
+    const tacGiaIds = authorVal ? [parseInt(authorVal)] : [1];
 
-    const payload = { tenSach, donGia, soLuongCo, donViTinh, maLoai, tenNXB, moTa, maTG };
+    const payload = {
+        tenSach,
+        donGia,
+        soLuongCo,
+        donViTinh,
+        moTa,
+        loaiSach: { maLoai: maLoai },
+        nhaXuatBan: { maNXB: 1 },
+        tacGiaIds: tacGiaIds
+    };
 
     try {
         Swal.showLoading();
@@ -1710,16 +1783,24 @@ async function openAddStaffModal() {
         `,
         focusConfirm: false,
         showCancelButton: true,
-        preConfirm: () => [
-            document.getElementById('s-username').value,
-            document.getElementById('s-password').value,
-            document.getElementById('s-fullname').value,
-            document.getElementById('s-cccd').value
-        ]
+        confirmButtonText: 'Lưu nhân viên',
+        cancelButtonText: 'Hủy',
+        preConfirm: () => {
+            const u = document.getElementById('s-username').value.trim();
+            const p = document.getElementById('s-password').value;
+            const f = document.getElementById('s-fullname').value.trim();
+            const c = document.getElementById('s-cccd').value.trim();
+            if (!u || !p) {
+                Swal.showValidationMessage('Vui lòng nhập tên đăng nhập và mật khẩu!');
+                return false;
+            }
+            return [u, p, f, c];
+        }
     });
 
     if (formValues && formValues[0]) {
         try {
+            Swal.showLoading();
             await apiRequest('/nv', 'POST', {
                 tenDangNhap: formValues[0],
                 matKhau: formValues[1],
@@ -1735,9 +1816,19 @@ async function openAddStaffModal() {
 }
 
 async function deleteStaffAdmin(maNV) {
-    if (!confirm('Bạn có chắc chắn muốn xóa nhân viên này?')) return;
+    const confirm = await Swal.fire({
+        title: 'Xác nhận xóa nhân viên?',
+        text: `Bạn có chắc chắn muốn xóa nhân viên #${maNV}?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Xóa ngay',
+        cancelButtonText: 'Hủy'
+    });
+    if (!confirm.isConfirmed) return;
+
     try {
         await apiRequest(`/nv/${maNV}`, 'DELETE');
+        Swal.fire({ icon: 'success', title: 'Đã xóa nhân viên thành công', timer: 1200, showConfirmButton: false });
         await loadAdminUsers();
     } catch (e) {
         Swal.fire({ icon: 'error', text: e.message });
